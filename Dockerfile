@@ -1,17 +1,15 @@
 #
-FROM python:3.11
+FROM python:3.11-buster
 
 #
-WORKDIR /code
+RUN pip install --upgrade pip
+RUN pip install poetry
 
 #
-COPY ./requirements.txt /code/requirements.txt
+COPY . .
 
 #
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
+RUN poetry install
 
 #
-COPY ./app /code/app
-
-#
-CMD ["fastapi", "run", "app/main.py", "--port", "80"]
+ENTRYPOINT ["poetry", "run", "python", "-m", "app.main", "--port", "80"]
