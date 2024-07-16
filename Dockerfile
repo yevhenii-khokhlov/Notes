@@ -1,5 +1,5 @@
 #
-FROM andarius/python:3.11-poetry
+FROM python:3.11-slim
 
 #
 RUN pip install --upgrade pip
