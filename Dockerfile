@@ -1,15 +1,16 @@
 #
-FROM python:3.11-buster
+FROM andarius/python:3.11-poetry
 
 #
 RUN pip install --upgrade pip
 RUN pip install poetry
 
 #
-COPY . .
+COPY . /srv/app
 
+WORKDIR /srv/app
 #
 RUN poetry install
 
 #
-ENTRYPOINT ["poetry", "run", "python", "-m", "app.main", "--port", "80"]
+CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
