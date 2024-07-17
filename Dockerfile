@@ -1,16 +1,22 @@
+FROM python:3.11-slim as requirements-stage
+
+WORKDIR /tmp
+
+RUN pip install poetry
+
+COPY ./pyproject.toml ./poetry.lock* /tmp/
+
+RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+
 #
 FROM python:3.11-slim
 
-#
-RUN pip install --upgrade pip
-RUN pip install poetry
+WORKDIR /code
 
-#
-COPY . /srv/app
+COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
 
-WORKDIR /srv/app
-#
-RUN poetry install
+RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
-#
-CMD ["poetry", "run", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
+COPY ./app /code/app
+
+CMD ["fastapi", "run", "app/main.py", "--port", "80"]
