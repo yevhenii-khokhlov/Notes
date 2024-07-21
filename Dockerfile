@@ -1,22 +1,27 @@
-FROM python:3.11-slim as requirements-stage
+FROM python:3.11-buster as builder
 
-WORKDIR /tmp
+RUN pip install poetry==1.8.0
 
-RUN pip install poetry
+ENV POETRY_NO_INTERACTION=1 \
+    POETRY_VIRTUALENVS_IN_PROJECT=1 \
+    POETRY_VIRTUALENVS_CREATE=1 \
+    POETRY_CACHE_DIR=/tmp/poetry_cache
 
-COPY ./pyproject.toml ./poetry.lock* /tmp/
+WORKDIR /app
 
-RUN poetry export -f requirements.txt --output requirements.txt --without-hashes
+COPY pyproject.toml poetry.lock ./
+
+RUN touch README.md
+RUN poetry install --no-root && rm -rf $POETRY_CACHE_DIR
 
 #
-FROM python:3.11-slim
+FROM python:3.11-slim-buster as runtime
 
-WORKDIR /code
+ENV VIRTUAL_ENV=/app/.venv \
+    PATH="/app/.venv/bin:$PATH"
 
-COPY --from=requirements-stage /tmp/requirements.txt /code/requirements.txt
+COPY --from=builder ${VIRTUAL_ENV} ${VIRTUAL_ENV}
 
-RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
-
-COPY ./app /code/app
+COPY app ./app
 
 CMD ["fastapi", "run", "app/main.py", "--port", "80"]
