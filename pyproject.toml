@@ -12,6 +12,7 @@ sqlalchemy = "2.0.31"
 uvicorn = "0.30.1"
 pytest="8.2.2"
 httpx="0.27.0"
+tox="4.18.0"
 
 [build-system]
 requires = ["poetry-core"]
